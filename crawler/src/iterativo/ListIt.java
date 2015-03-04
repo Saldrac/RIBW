@@ -33,16 +33,20 @@ class ListIt {
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length < 1) {
-			System.out.println("ERROR. formato: >java ListIt nombre_archivo");
-			return;
-		}
+		System.out.println("Introduzca un directorio");
+		Scanner in = new Scanner(System.in);
+		String directorio = in.next();
+		System.out.println("Introduzca un fichero de salida");
+		String salida = in.next();
+		
 		ListIt lister = new ListIt();
 		List<File> lista = new ArrayList<File>();
-		lister.crawlDir(args[0],lista);
+		lister.crawlDir(directorio,lista);
+		
+		
 		
 		for(File f: lista){
-			FichContPalabras.contar(f.getAbsolutePath(), args[1]);
+			FichContPalabras.contar(f.getAbsolutePath(), salida);
 		}
 	
 	}

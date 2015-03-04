@@ -35,11 +35,13 @@ class ListIt {
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length < 1) {
-			System.out.println("ERROR. formato: >java ListIt nombre_archivo");
-			return;
-		}
+		System.out.println("Introduzca un directorio");
+		Scanner in = new Scanner(System.in);
+		String directorio = in.next();
+		System.out.println("Introduzca un fichero de salida");
+		String salida = in.next();
+		
 		ListIt lister = new ListIt();
-		lister.crawlDir(args[0], args[1]);
+		lister.crawlDir(directorio,salida);
 	}
 }
