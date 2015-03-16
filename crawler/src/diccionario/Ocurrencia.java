@@ -48,5 +48,7 @@ public class Ocurrencia implements Serializable {
 			System.out.println("Fichero: " + k + " --- Ocurrencias: " + ocurrencia.get(k));
 		}
 	}
+	
+	
 
 }

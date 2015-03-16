@@ -115,6 +115,17 @@ public class Diccionario implements Serializable {
 			System.out.println("No se ha podido cargar");
 		}
 	}
+	
+	public static void buscar(String palabra){
+		
+		Ocurrencia ret = null;
+		if((ret=diccionario.get(palabra)) != null){
+			ret.mostrar();
+		}else{
+			System.out.println("La palabra " + palabra + " no se encuentra en el diccionario");
+		}
+		
+	}
 
 	public static void main(String[] args) {
 
@@ -128,7 +139,8 @@ public class Diccionario implements Serializable {
 			System.out.println("2. Cargar");
 			System.out.println("3. Guardar");
 			System.out.println("4. Mostrar");
-			System.out.println("5. Salir");
+			System.out.println("5. Buscar");
+			System.out.println("6. Salir");
 			System.out.println("-----------------");
 
 			selec = in.nextInt();
@@ -149,6 +161,10 @@ public class Diccionario implements Serializable {
 				mostrar();
 				break;
 			case 5:
+				System.out.print("Introduzca palabra: ");
+				buscar(in.next());
+				break;
+			case 6:
 				salir = true;
 				break;
 			default:
