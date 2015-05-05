@@ -15,9 +15,21 @@ public class Ocurrencia implements Serializable {
 	private int num_frec = 0;
 	private TreeMap<String, Integer> ocurrencia = new TreeMap<String, Integer>();
 	private List<Ranking> ranking = new ArrayList<Ranking>();
-	private static final float PARCIAL_TOTAL = (float) 1.8; //+80%
-	private static final float TOTAL_TAM = (float) 1.30; //+30%
-	private static final float ULTIMO_ACCS = (float) -0.25; //25%
+
+	private static final float PARCIAL_TOTAL = (float) 1.8; // +80%
+	private static final float ULTIMO_ACCS = (float) -1.25; // -25%
+
+	private static final float UMBRAL_SPAM_1 = (float) 0.3;
+	private static final float UMBRAL_SPAM_2 = (float) 0.5;
+	private static final float UMBRAL_SPAM_3 = (float) 0.9;
+
+	private static final float UMBRAL_MOD_1 = 15;
+	private static final float UMBRAL_MOD_2 = 60;
+	private static final float UMBRAL_MOD_3 = 365;
+
+	private static final float UMBRAL_OCUR_1 = (float) 0.3;
+	private static final float UMBRAL_OCUR_2 = (float) 0.5;
+	private static final float UMBRAL_OCUR_3 = (float) 0.7;
 
 	public Ocurrencia(String url) {
 		insOcurrencia(url);
@@ -52,25 +64,60 @@ public class Ocurrencia implements Serializable {
 		}
 	}
 
-	private float calcularTiempoModificacion(File fichero) {
-		int diasHoy = (int) TimeUnit.MILLISECONDS.toDays(System
-				.currentTimeMillis());
-		int diasMod = (int) TimeUnit.MILLISECONDS.toDays(fichero
-				.lastModified());
-		return (float) (diasMod / diasHoy) / 365;
+	private int rankingSpam(float valor) {
+		int calculo = 0;
+		if (valor <= UMBRAL_SPAM_1) {
+			calculo += 4;
+		} else if (valor <= UMBRAL_SPAM_2) {
+			calculo += 2;
+		} else if(valor <= UMBRAL_SPAM_3 || valor > UMBRAL_SPAM_3){
+			calculo -= 7;
+		}
+
+		return calculo;
 	}
 
-	private float calcularValorRank(String url) {
+	private int rankingModif(int valor) {
+		int calculo = 0;
+		if (valor <= UMBRAL_MOD_1) {
+			calculo += 4;
+		} else if (valor <= UMBRAL_MOD_2) {
+			calculo += 2;
+		} else if(valor <= UMBRAL_MOD_3 || valor > UMBRAL_MOD_3){
+			calculo -= 3;
+		}
+
+		return calculo;
+	}
+
+	private int rankingApariciones(float valor) {
+		int calculo = 0;
+		if (valor <= UMBRAL_OCUR_1) {
+			calculo += 1;
+		} else if (valor <= UMBRAL_OCUR_2) {
+			calculo += 2;
+		} else if(valor <= UMBRAL_OCUR_3 || valor > UMBRAL_OCUR_3){
+			calculo += 3;
+		}
+
+		return calculo;
+	}
+
+	private float calcularValorRank(String url,
+			TreeMap<String, Integer> contPalabras) {
 		File fichero = new File(url);
 		float parcial = (float) ocurrencia.get(url) / num_frec;
-		float tam = (float) num_frec / (fichero.length() / 1024 * 1024);
-		
-		return parcial * PARCIAL_TOTAL + tam * TOTAL_TAM
-				+ calcularTiempoModificacion(fichero) * ULTIMO_ACCS;
+		float spam = (float) ocurrencia.get(url) / contPalabras.get(url);
+		int diasMod = (int) TimeUnit.MILLISECONDS
+				.toDays(fichero.lastModified());
+		int diasHoy = (int) TimeUnit.MILLISECONDS.toDays(System
+				.currentTimeMillis());
+		return rankingApariciones(parcial) + rankingModif(Math.abs(diasHoy - diasMod))
+				+ rankingSpam(spam);
 
 	}
 
-	public void mostrar() {
+	public void mostrar(TreeMap<String, Integer> contPalabras) {
 		long startTime = System.currentTimeMillis();
 		System.out.println("Número de archivos: " + ocurrencia.size());
 		System.out.println("Ocurrencias totales: " + num_frec);
@@ -81,7 +128,8 @@ public class Ocurrencia implements Serializable {
 		while (i.hasNext()) {
 			Object k = i.next();
 			updateRanking((String) k);
-			ranking.add(new Ranking((String) k, calcularValorRank((String) k)));
+			ranking.add(new Ranking((String) k, calcularValorRank((String) k,
+					contPalabras)));
 		}
 
 		Collections.sort(ranking);
@@ -90,9 +138,40 @@ public class Ocurrencia implements Serializable {
 					+ ocurrencia.get(r.getPath()) + " --- Ranking: "
 					+ r.getResult());
 		}
-		
-		long endTime   = System.currentTimeMillis();
-		System.out.println("Tiempo transcurrido: " + (endTime - startTime) + " ms");
+
+		long endTime = System.currentTimeMillis();
+		System.out.println("Tiempo transcurrido: " + (endTime - startTime)
+				+ " ms");
 
 	}
+	
+	public List<Ranking> getRanking(TreeMap<String, Integer> contPalabras){
+		List claves = new ArrayList(ocurrencia.keySet());
+		Collections.sort(claves);
+		Iterator i = claves.iterator();
+
+		while (i.hasNext()) {
+			Object k = i.next();
+			updateRanking((String) k);
+			ranking.add(new Ranking((String) k, calcularValorRank((String) k,
+					contPalabras)));
+		}
+
+		Collections.sort(ranking);
+		return ranking;
+	}
+	
+	public int getTotalOcurrencias(){
+		return ocurrencia.size();
+	}
+	
+	public int getNumFrec(){
+		return num_frec;
+	}
+	
+	public TreeMap<String, Integer> getOcurrencias(){
+		return ocurrencia;
+	}
+	
+	
 }
