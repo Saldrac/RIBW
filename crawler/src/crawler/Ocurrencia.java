@@ -118,7 +118,6 @@ public class Ocurrencia implements Serializable {
 	}
 
 	public void mostrar(TreeMap<String, Integer> contPalabras) {
-		long startTime = System.currentTimeMillis();
 		System.out.println("Número de archivos: " + ocurrencia.size());
 		System.out.println("Ocurrencias totales: " + num_frec);
 		List claves = new ArrayList(ocurrencia.keySet());
@@ -138,11 +137,6 @@ public class Ocurrencia implements Serializable {
 					+ ocurrencia.get(r.getPath()) + " --- Ranking: "
 					+ r.getResult());
 		}
-
-		long endTime = System.currentTimeMillis();
-		System.out.println("Tiempo transcurrido: " + (endTime - startTime)
-				+ " ms");
-
 	}
 	
 	public List<Ranking> getRanking(TreeMap<String, Integer> contPalabras){

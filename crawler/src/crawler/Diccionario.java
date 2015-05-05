@@ -136,7 +136,7 @@ public class Diccionario implements Serializable {
 			diccionario = (TreeMap<String, Ocurrencia>) ois.readObject();
 			ois.close();
 
-			fis = new FileInputStream(nombre+"_wc");
+			fis = new FileInputStream(nombre + "_wc");
 			ois = new ObjectInputStream(fis);
 			contPalabras = (TreeMap<String, Integer>) ois.readObject();
 			ois.close();
@@ -156,34 +156,37 @@ public class Diccionario implements Serializable {
 					+ " no se encuentra en el diccionario");
 		}
 	}
-	
+
 	public static void busqueda_mult(String palabra1, String palabra2) {
-		System.out.println("Tokens: " + palabra1 + " " + palabra2);
 		Ocurrencia ret1 = diccionario.get(palabra1);
 		Ocurrencia ret2 = diccionario.get(palabra2);
 		List<Ranking> listRet1 = null;
 		List<Ranking> listRet2 = null;
 		TreeMap<String, Integer> ocurrencia1 = null;
 		TreeMap<String, Integer> ocurrencia2 = null;
-		Ranking r1 = null;
-		Ranking r2 = null;
 
-		if ((ret1 != null) && (ret2 != null)) {
+		if ((ret1 != null) && (ret2 != null) && palabra1.compareTo(palabra2) != 0)  {
+			System.out.println("Tokens: " + palabra1 + " " + palabra2);
 			listRet1 = ret1.getRanking(contPalabras);
 			listRet2 = ret2.getRanking(contPalabras);
 			ocurrencia1 = ret1.getOcurrencias();
 			ocurrencia2 = ret2.getOcurrencias();
 
-			for(int i=0,j=0;i<listRet1.size()&&j<listRet2.size();i++,j++){
-				r1 = listRet1.get(i);
-				r2 = listRet2.get(j);
-				if(r1.getPath().compareTo(r1.getPath()) == 0){
-					System.out.println("Fichero: " + r1.getPath() + " --- Ocurrencias: "
-							+ (ocurrencia1.get(r1.getPath()) + ocurrencia2.get(r2.getPath())) + " --- Ranking: "
-							+ (r2.getResult() + r1.getResult()));
+			for (Ranking r1 : listRet1) {
+				for (Ranking r2 : listRet2) {
+					if (r1.getPath().compareTo(r2.getPath()) == 0) {
+						System.out.println("Fichero: "
+								+ r1.getPath()
+								+ " --- Ocurrencias: "
+								+ (ocurrencia1.get(r1.getPath()) + ocurrencia2
+										.get(r2.getPath())) + " --- Ranking: "
+								+ (r2.getResult() + r1.getResult()));
+
+					}
 				}
-				
 			}
+		}else{
+			System.out.println("Una o varias palabras no se encuentran en el diccionario");
 		}
 
 	}
@@ -206,6 +209,8 @@ public class Diccionario implements Serializable {
 			System.out.println("-----------------");
 
 			selec = in.nextInt();
+			long startTime = System.currentTimeMillis();
+
 			switch (selec) {
 			case 1:
 				System.out.print("Introduzca directorio raíz: ");
@@ -237,7 +242,6 @@ public class Diccionario implements Serializable {
 			default:
 				break;
 			}
-
 		}
 
 		in.close();
