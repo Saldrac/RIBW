@@ -33,16 +33,11 @@ public class Diccionario implements Serializable {
 						archivos);
 			}
 		} else {
-			if (fichero.getPath().endsWith(".txt")) {
-				archivos.add(fichero);
-			}
+			archivos.add(fichero);
 		}
 	}
 
 	public static void guardarPalabras(List<File> archivos) {
-
-		BufferedReader br = null;
-		String linea = "";
 		String palabra = "";
 		Object ret = null;
 
@@ -50,33 +45,27 @@ public class Diccionario implements Serializable {
 		String path = "";
 		try {
 			for (File fichero : archivos) {
-				br = new BufferedReader(new FileReader(
-						fichero.getAbsolutePath()));
+				Parser parser = new Parser(fichero.getAbsolutePath());
 				path = fichero.getAbsolutePath();
-				while ((linea = br.readLine()) != null) {
-					StringTokenizer st = new StringTokenizer(linea);
-					while (st.hasMoreTokens()) {
-						palabra = Thesauro.normalizar(st.nextToken());
-						if (thesauro.buscar(palabra)) {
-							ret = diccionario.get(palabra);
-							if (ret == null) {
-								diccionario.put(
-										palabra,
-										new Ocurrencia(fichero
-												.getAbsolutePath()));
-							} else {
-								diccionario.put(
-										palabra,
-										new Ocurrencia(fichero
-												.getAbsolutePath(),
-												(Ocurrencia) ret));
-							}
-
-							palabras++;
+				StringTokenizer st = new StringTokenizer(parser.parseDoc());
+				while (st.hasMoreTokens()) {
+					palabra = Thesauro.normalizar(st.nextToken());
+					if (thesauro.buscar(palabra)) {
+						ret = diccionario.get(palabra);
+						if (ret == null) {
+							diccionario.put(palabra,
+									new Ocurrencia(fichero.getAbsolutePath()));
+						} else {
+							diccionario.put(palabra,
+									new Ocurrencia(fichero.getAbsolutePath(),
+											(Ocurrencia) ret));
 						}
 
+						palabras++;
 					}
+
 				}
+
 				contPalabras.put(path, new Integer(palabras));
 				palabras = 0;
 				path = "";
@@ -88,13 +77,9 @@ public class Diccionario implements Serializable {
 	}
 
 	public static void crearDiccionario(String directorio) {
-		long startTime = System.currentTimeMillis();
 		List<File> listaArchivos = new ArrayList<File>();
 		getArchivos(directorio, listaArchivos);
 		guardarPalabras(listaArchivos);
-		long endTime = System.currentTimeMillis();
-		System.out.println("Tiempo transcurrido: " + (endTime - startTime)
-				+ " ms");
 	}
 
 	public static void mostrar() {
@@ -165,7 +150,8 @@ public class Diccionario implements Serializable {
 		TreeMap<String, Integer> ocurrencia1 = null;
 		TreeMap<String, Integer> ocurrencia2 = null;
 
-		if ((ret1 != null) && (ret2 != null) && palabra1.compareTo(palabra2) != 0)  {
+		if ((ret1 != null) && (ret2 != null)
+				&& palabra1.compareTo(palabra2) != 0) {
 			System.out.println("Tokens: " + palabra1 + " " + palabra2);
 			listRet1 = ret1.getRanking(contPalabras);
 			listRet2 = ret2.getRanking(contPalabras);
@@ -185,8 +171,9 @@ public class Diccionario implements Serializable {
 					}
 				}
 			}
-		}else{
-			System.out.println("Una o varias palabras no se encuentran en el diccionario");
+		} else {
+			System.out
+					.println("Una o varias palabras no se encuentran en el diccionario");
 		}
 
 	}
@@ -209,7 +196,6 @@ public class Diccionario implements Serializable {
 			System.out.println("-----------------");
 
 			selec = in.nextInt();
-			long startTime = System.currentTimeMillis();
 
 			switch (selec) {
 			case 1:
